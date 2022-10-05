@@ -9,20 +9,24 @@ def run_episode(env: Environment, agent: QAgent, max_step: int, eval: bool, show
     state = env.reset()
     actions_name = {0: "halt", 1: "left", 2: "right", 3: "up", 4: "down"}
     n_step = 1
+    if show:
+        print(
+            "Symbols meaning [P: Player/Agent, E: enemy, F: food/goal, ?: E+F, @: P+F, X: P+E, #: P+E+F]")
+        print("New Environment :")
+        print(env)
     while True:
         action = agent.act(state, eval)
-        if show:
-            print(env)
-            print(f"step: {n_step}\t action : {actions_name[action]}\n")
         reward, next_state, done = env.step(action)
+        if show:
+            print(
+                f"action : {actions_name[action]} is taken at step: {n_step}\n")
+            print(env)
         if not eval:
             agent.update(state, action, reward, next_state, done)
         state = next_state
         n_step += 1
         if done or n_step > max_step:
             break
-    if show:
-        print(env)
 
     return reward
 
@@ -32,13 +36,17 @@ def train(environment: Environment, agent: QAgent, num_episode: int, max_step: i
     episodes = []
     eval_every = 10
     n_eval = 5
-    for ep in tqdm(range(1, num_episode+1)):
-        run_episode(environment, agent, max_step, eval=False, show=False)
-        if ep % 10 == 0:
-            episodes.append(ep)
-            mean_reward = np.mean([run_episode(
-                environment, agent, max_step, eval=True, show=False) for _ in range(n_eval)])
-            rewards.append(mean_reward)
+    try:
+        for ep in tqdm(range(1, num_episode+1)):
+            run_episode(environment, agent, max_step, eval=False, show=False)
+            if ep % 10 == 0:
+                episodes.append(ep)
+                mean_reward = np.mean([run_episode(
+                    environment, agent, max_step, eval=True, show=False) for _ in range(n_eval)])
+                rewards.append(mean_reward)
+    except KeyboardInterrupt:
+        print(f"Training interrupted at {ep} episodes.")
+        input("Press enter to continue ...")
 
     return episodes, rewards
 
