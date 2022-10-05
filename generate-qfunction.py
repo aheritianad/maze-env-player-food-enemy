@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from environment import Environment
 from agent import QAgent
 from train import train, plot_rewards, run_episode
