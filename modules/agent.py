@@ -1,4 +1,4 @@
-from utils import save_to_json, read_from_json
+from modules.utils import save_to_json, read_from_json
 import numpy as np
 
 
