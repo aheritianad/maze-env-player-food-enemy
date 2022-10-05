@@ -40,15 +40,18 @@ n_episode = args["n_episode"]
 max_step = args["max_step"]
 path_load_qfunction = args.get("path_to_load_qfunction", None)
 path_save_qfunction = args.get(
-    "path_to_save_qfunction", f"./qfunction/qfunction-{env_size}.json")
+    "path_to_save_qfunction", None)  # f"./qfunction/qfunction-{env_size}.json")
 show_plot = args.get("show", False)
 
 
 env = Environment(env_size=env_size)
 agent = QAgent(num_actions=num_actions, gamma=gamma,
                learning_rate=learning_rate, epsilon=epsilon, qfunction=path_load_qfunction)
+print("Start trainining...")
 episodes, rewards = train(environment=env, agent=agent,
                           num_episode=n_episode, max_step=max_step)
-agent.save_qfunction(path_save_qfunction)
+print("Training done successfully.")
+if path_save_qfunction is not None:
+    agent.save_qfunction(path_save_qfunction)
 if show_plot:
     plot_rewards(episodes, rewards)
