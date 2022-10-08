@@ -4,11 +4,22 @@ from typing import *
 
 class Environment:
     def __init__(self, env_size: int, n_enemy: int = 1) -> None:
+        """Maze class.
+
+        Args:
+            env_size (int): size of the environment (`env_size x env_size`).
+            n_enemy (int, optional): number of enemies in the environment. Defaults to 1.
+        """
         self.env_size = env_size
         self.n_enemy = n_enemy
         self.reset()
 
-    def reset(self):
+    def reset(self) -> str:
+        """Reset method for an environment.
+
+        Returns:
+            str: initial state of the environment.
+        """
         self.food = np.random.randint(self.env_size, size=2)
         self.enemies = [np.random.randint(
             self.env_size, size=2) for _ in range(self.n_enemy)]
@@ -22,7 +33,12 @@ class Environment:
         return self.state
 
     @property
-    def state(self):
+    def state(self) -> str:
+        """State of the environment.
+
+        Returns:
+            str: state of the environment.
+        """
         def make_string(xy): return str(xy[0])+"_"+str(xy[1])
         order_enem = sorted([tuple(coordinate) for coordinate in self.enemies])
         return "-".join(
@@ -34,11 +50,21 @@ class Environment:
             )
         )
 
-    def render(self):
+    def render(self) -> np.array:
+        """Render method for the environment.
+        0 : empty cell
+        1 : player
+        2 : food
+        3 : enemy
+        4 : enemies stand on the food
+        5 : player reach the food
+        6 : enemies catch the player
+        7 : enemies, player and food are located in the same location.
+
+        Returns:
+            np.array: grid version of the environment.
+        """
         grid = np.zeros((self.env_size, self.env_size), dtype=int)
-        # 1 : player
-        # 2 : food
-        # 3 : enemy
         p = tuple(self.player)
         f = tuple(self.food)
         grid[p] = 1
@@ -58,7 +84,12 @@ class Environment:
 
         return grid
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Representation method of an environment.
+
+        Returns:
+            str: string representation of an environment.
+        """
         grid = self.render()
         repr = {0: " ", 1: "P", 2: "F", 3: "E", 4: "?", 5: "@", 6: "X", 7: "#"}
         result = " " + "-"*self.env_size + "\n"
@@ -72,10 +103,23 @@ class Environment:
         return result
 
     @property
-    def done(self):
+    def done(self) -> bool:
+        """Environment property for terminal state.
+
+        Returns:
+            bool: flag for eitheir current state of the environment is a terminal state or not.
+        """
         return self._done
 
-    def step(self, palyer_direction):
+    def step(self, palyer_direction: int) -> tuple[int, str, bool]:
+        """Step method for the environment.
+
+        Args:
+            palyer_direction (int): direction where the player chose.
+
+        Returns:
+            tuple[int, str, bool]: reward, new state and its terminal state flag obtained after stepping in the environment.
+        """
         # move player
         self.move("player", palyer_direction)
 
@@ -89,7 +133,17 @@ class Environment:
         next_state = self.state
         return reward, next_state, done
 
-    def move(self, entity_name, direction):
+    def move(self, entity_name: str, direction: int) -> None:
+        """Move function for player and enemies.
+
+        Args:
+            entity_name (str): name of the entity to move, `"player"` or `"enemy0", "enemy1", ...`.
+            direction (int): the direction that the entity will move.
+                                (`0: halt, 1: left, 2: right, 3: up, 4: down`)
+
+        Raises:
+            ValueError: ValueError will be raised if the entity name or direction does not fit with the requirement.
+        """
         if entity_name == "player":
             entity = self.player
         elif "enemy" in entity_name:
@@ -112,8 +166,17 @@ class Environment:
         elif direction == 4:  # down
             # not allowed to go out of the wall
             entity[0] = min(self.env_size - 1, entity[0] + 1)
+        else:
+            raise ValueError(
+                f"Uknown direction, expected to be 0,1,2,3 or 4 but {direction} were given.")
 
-    def get_reward_and_done(self):
+    def get_reward_and_done(self) -> tuple[int, bool]:
+        """Get reward and terminal sate flag of current state of the environment.
+        Also, it can be used to update the terminal state flag of the evironment.
+
+        Returns:
+            tuple[int, bool]: reward and terminal state flag of the current environment.
+        """
         reward = 0
         done = False
         if np.all(self.player == self.food):
