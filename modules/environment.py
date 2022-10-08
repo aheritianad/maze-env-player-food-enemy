@@ -47,13 +47,14 @@ class Environment:
             grid[f] = 5
         for enemy in self.enemies:
             e = tuple(enemy)
-            grid[e] = 3
-            if f == e:
-                grid[f] = 4
-            if e == p:
-                grid[e] = 6
             if e == f and f == p:
                 grid[e] = 7
+            elif e == f:
+                grid[e] = 4
+            elif e == p:
+                grid[e] = 6
+            else:
+                grid[e] = 3
 
         return grid
 
