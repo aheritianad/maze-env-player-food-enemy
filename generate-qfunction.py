@@ -43,7 +43,7 @@ n_episode = args["n_episode"]
 max_step = args["max_step"]
 path_load_qfunction = args.get("path_to_load_qfunction", None)
 path_save_qfunction = args.get(
-    "path_to_save_qfunction", None)  # f"./qfunction/qfunction-{env_size}.json")
+    "path_to_save_qfunction", None)
 show_plot = args.get("show", False)
 
 
