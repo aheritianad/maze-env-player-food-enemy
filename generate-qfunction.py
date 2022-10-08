@@ -11,6 +11,8 @@ parser = ArgumentParser(
 
 parser.add_argument("-n", "--env-size", type=int,
                     help="size of the environment")
+parser.add_argument("-en", "--n-enem", type=int,
+                    help="number of enemy in the evironment")
 parser.add_argument("-g", "--gamma", type=float,
                     help="discount factor (horizon-size)")
 parser.add_argument("-lr", "--learning-rate", type=float,
@@ -32,6 +34,7 @@ parser.add_argument("-show", "--show", type=bool,
 args = vars(parser.parse_args())
 
 env_size = args["env_size"]
+n_enem = args.get("n_enem",1)
 num_actions = 5
 gamma = args["gamma"]
 learning_rate = args["learning_rate"]
@@ -44,7 +47,7 @@ path_save_qfunction = args.get(
 show_plot = args.get("show", False)
 
 
-env = Environment(env_size=env_size)
+env = Environment(env_size=env_size, n_enemy=n_enem)
 agent = QAgent(num_actions=num_actions, gamma=gamma,
                learning_rate=learning_rate, epsilon=epsilon, qfunction=path_load_qfunction)
 print("Start trainining...")

@@ -3,17 +3,19 @@ from typing import *
 
 
 class Environment:
-    def __init__(self, env_size) -> None:
+    def __init__(self, env_size: int, n_enemy: int = 1) -> None:
         self.env_size = env_size
+        self.n_enemy = n_enemy
         self.reset()
 
     def reset(self):
         self.food = np.random.randint(self.env_size, size=2)
-        self.enemy = np.random.randint(self.env_size, size=2)
+        self.enemies = [np.random.randint(
+            self.env_size, size=2) for _ in range(self.n_enemy)]
         while True:
             self.player = np.random.randint(
                 self.env_size, size=2)  # need to fix
-            self.get_reward_and_done()
+            self.get_reward_and_done()  # update self._done
             if not self._done:  # self._done == False
                 break
 
@@ -21,11 +23,13 @@ class Environment:
 
     @property
     def state(self):
+        def make_string(xy): return str(xy[0])+"_"+str(xy[1])
+        order_enem = sorted([tuple(coordinate) for coordinate in self.enemies])
         return "-".join(
             list(
                 map(
-                    lambda xy: str(xy[0])+"_"+str(xy[1]),
-                    [self.player, self.food, self.enemy]
+                    make_string,
+                    [self.player, self.food, *order_enem]
                 )
             )
         )
@@ -37,18 +41,19 @@ class Environment:
         # 3 : enemy
         p = tuple(self.player)
         f = tuple(self.food)
-        e = tuple(self.enemy)
         grid[p] = 1
         grid[f] = 2
-        grid[e] = 3
-        if f == e:
-            grid[f] = 4
         if f == p:
             grid[f] = 5
-        if e == p:
-            grid[e] = 6
-        if e == f and f == p:
-            grid[e] = 7
+        for enemy in self.enemies:
+            e = tuple(enemy)
+            grid[e] = 3
+            if f == e:
+                grid[f] = 4
+            if e == p:
+                grid[e] = 6
+            if e == f and f == p:
+                grid[e] = 7
 
         return grid
 
@@ -73,9 +78,10 @@ class Environment:
         # move player
         self.move("player", palyer_direction)
 
-        # always move enemy randomly
-        enemy_direction = np.random.randint(1, 5)
-        self.move("enemy", enemy_direction)
+        # always move enemies randomly
+        for i in range(self.n_enemy):
+            enemy_direction = np.random.randint(1, 5)
+            self.move(f"enemy{i}", enemy_direction)
 
         # get reward after a step
         reward, done = self.get_reward_and_done()
@@ -83,8 +89,13 @@ class Environment:
         return reward, next_state, done
 
     def move(self, entity_name, direction):
-        entities = {"player": self.player, "enemy": self.enemy}
-        entity = entities[entity_name]
+        if entity_name == "player":
+            entity = self.player
+        elif "enemy" in entity_name:
+            e_index = int(entity_name[5:])
+            entity = self.enemies[e_index]
+        else:
+            raise ValueError(f"Invalid entity_name {entity_name}")
 
         if direction == 0:  # do not move
             pass
@@ -107,8 +118,9 @@ class Environment:
         if np.all(self.player == self.food):
             reward += 1
             done = True
-        if np.all(self.player == self.enemy):
-            reward -= 1
-            done = True
+        for enemy in self.enemies:
+            if np.all(self.player == enemy):
+                reward -= 1
+                done = True
         self._done = done
         return reward, done
