@@ -1,1 +1,4 @@
-*.json filter=lfs diff=lfs merge=lfs -text
+qfunction/*.json filter=lfs diff=lfs merge=lfs -text
+qfunction/qfunction-3.json filter=lfs diff=lfs merge=lfs -text
+qfunction/qfunction-5.json filter=lfs diff=lfs merge=lfs -text
+qfunction/qfunction-size5_enem3.json filter=lfs diff=lfs merge=lfs -text
