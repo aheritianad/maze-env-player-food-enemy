@@ -6,6 +6,7 @@ from modules.train import train, plot_rewards, run_episode
 
 from argparse import ArgumentParser
 
+# Parse argument from cli.
 parser = ArgumentParser(
     description="Generate a qvalue function in a json file.")
 
@@ -30,11 +31,12 @@ parser.add_argument("-s", "--path-to-save-qfunction", type=str,
 parser.add_argument("-show", "--show", type=bool,
                     help="flag either user want to show the reward during training")
 
-
+# put arguments in a dictionary
 args = vars(parser.parse_args())
 
+# grab each arguments from the dictionary
 env_size = args["env_size"]
-n_enem = args.get("n_enem",1)
+n_enem = args.get("n_enem", 1)
 num_actions = 5
 gamma = args["gamma"]
 learning_rate = args["learning_rate"]
@@ -46,15 +48,23 @@ path_save_qfunction = args.get(
     "path_to_save_qfunction", None)
 show_plot = args.get("show", False)
 
-
+# generate environment
 env = Environment(env_size=env_size, n_enemy=n_enem)
+
+# generate an agent
 agent = QAgent(num_actions=num_actions, gamma=gamma,
                learning_rate=learning_rate, epsilon=epsilon, qfunction=path_load_qfunction)
+
+
 print("Start trainining...")
 episodes, rewards = train(environment=env, agent=agent,
                           num_episode=n_episode, max_step=max_step)
 print("Training done successfully.")
+
+# save the qfunction of the agent
 if path_save_qfunction is not None:
     agent.save_qfunction(path_save_qfunction)
+
+# plot the average rewards during training
 if show_plot:
     plot_rewards(episodes, rewards)
